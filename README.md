@@ -104,7 +104,18 @@ Sample GET request with token:
 }
 ```
 
-Notice that even though `authenticate` is not set (and therefore at the default value of `true`), you can still override `token` field by specifying it.
+Notice that even though `authenticate` is not set (and therefore at the default value of `true`), you can still override `token` field by specifying it. Remember, ordering within an JSON object is not significant, this sample's order is just specified for easy reading.
+
+## Limitations
+
+There are quite a lot of limitations. Here are some of them. Please feel free to send pull requests!
+
+* Unable to do 'partial' or 'wildcard' actual/expected result comparisons
+* Unable to do 'size of array' assertions, or only specific values'
+* Unable to POST files for bootstrap
+* JSON input file has many `{}`, should allow YAML 1.2 input too since it's a superset of JSON
+* Ugly output on the console, no alternate output options
+* Uses douglascrockford's reference `org.json` package, with the [bad license](http://tanguy.ortolo.eu/blog/article46/json-license), could be replaced with the [AOSP's clean-room implementation](https://android.googlesource.com/platform/libcore/+/ics-plus-aosp/json?autodive=0)
 
 ## Usage
 You will need to compile and run it with the dependencies in `/lib/`.
