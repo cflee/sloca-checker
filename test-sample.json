@@ -1,0 +1,145 @@
+[
+    {
+        "baseUrl": "http://localhost:8084/json/",
+        "secret": "abcdefghijklmnop",
+        "adminUsername": "admin"
+    },
+    {
+        "endpoint": "authenticate",
+        "authenticate": false,
+        "description": "authenticate missing username and password",
+        "post": true,
+        "result": {
+            "status": "error",
+            "messages": ["missing password", "missing username"]
+        }
+    },
+    {
+        "endpoint": "authenticate",
+        "authenticate": false,
+        "description": "authenticate missing password",
+        "post": true,
+        "result": {
+            "status": "error",
+            "messages": ["missing password"]
+        },
+        "username": "admin"
+    },
+    {
+        "endpoint": "authenticate",
+        "authenticate": false,
+        "description": "authenticate missing username",
+        "post": true,
+        "result": {
+            "status": "error",
+            "messages": ["missing username"]
+        },
+        "password": "admin"
+    },
+    {
+        "endpoint": "authenticate",
+        "authenticate": false,
+        "description": "authenticate invalid username/password",
+        "post": true,
+        "result": {
+            "status": "error",
+            "messages": ["invalid username/password"]
+        },
+        "username": "admin",
+        "password": "admin"
+    },
+    {
+        "endpoint": "authenticate",
+        "authenticate": false,
+        "description": "authenticate valid username/password",
+        "post": true,
+        "result": {
+            "status": "success",
+            "token": "<some token>"
+        },
+        "username": "zorro.fan.2010",
+        "password": "zxcvbn1284"
+    },
+    {
+        "endpoint": "heatmap",
+        "description": "heatmap missing token",
+        "result": {
+            "status": "error",
+            "messages": ["missing token"]
+        },
+        "authenticate": false,
+        "date": "2014-01-01T00:00:00",
+        "floor": 1
+    },
+    {
+        "endpoint": "heatmap",
+        "description": "heatmap blank token",
+        "result": {
+            "status": "error",
+            "messages": ["blank token"]
+        },
+        "token": "",
+        "date": "2014-01-01T00:00:00",
+        "floor": 1
+    },
+    {
+        "endpoint": "heatmap",
+        "description": "heatmap invalid token",
+        "result": {
+            "status": "error",
+            "messages": ["invalid token"]
+        },
+        "token": "aaa",
+        "date": "2014-01-01T00:00:00",
+        "floor": 1
+    },
+    {
+        "endpoint": "heatmap",
+        "description": "heatmap missing floor",
+        "result": {
+            "status": "error",
+            "messages": ["missing floor"]
+        },
+        "date": "2014-01-01T00:00:00",
+    },
+    {
+        "endpoint": "heatmap",
+        "description": "heatmap blank floor",
+        "result": {
+            "status": "error",
+            "messages": ["blank floor"]
+        },
+        "date": "2014-01-01T00:00:00",
+        "floor": ""
+    },
+    {
+        "endpoint": "heatmap",
+        "description": "heatmap invalid floor < 0",
+        "result": {
+            "status": "error",
+            "messages": ["invalid floor"]
+        },
+        "date": "2014-01-01T00:00:00",
+        "floor": -1
+    },
+    {
+        "endpoint": "heatmap",
+        "description": "heatmap invalid floor > 10",
+        "result": {
+            "status": "error",
+            "messages": ["invalid floor"]
+        },
+        "date": "2014-01-01T00:00:00",
+        "floor": 11
+    },
+    {
+        "endpoint": "heatmap",
+        "description": "heatmap invalid floor non-numerical",
+        "result": {
+            "status": "error",
+            "messages": ["invalid floor"]
+        },
+        "date": "2014-01-01T00:00:00",
+        "floor": "a"
+    },
+]
