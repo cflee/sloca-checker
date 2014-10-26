@@ -133,7 +133,7 @@ A full and exact match (of the entire JSON object) is required to pass. Criteria
 * Extra, unexpected elements in JSON objects are rejected
 * All keys and values are case-sensitive
 
-Sample check object:
+**Sample check object:**
 
 ```
 {
@@ -150,7 +150,7 @@ Sample check object:
 
 Upon failure, this check type outputs the expected and actual JSON objects.
 
-Sample output:
+**Sample output:**
 
 ```
 Test #13-1 - FAIL - heatmap invalid floor non-numerical
@@ -171,9 +171,9 @@ There are several parts to this.
 
 First, there is the checker's standard line of test and check number, status, and description.
 
-Next, there is the message from the JSON object checker, that details the *differences* between what was expected and actually received.
+Next, there is the message from the JSON object checker, that details the *differences* between what was expected and actually received. It may be a little cryptic.
 
-This is followed by the full result that was expected and actually received, to easy troubleshooting.
+This is followed by the full result that was expected and actually received, for make benefit easy troubleshooting.
 
 ## Output format
 
@@ -188,7 +188,7 @@ Nonetheless, when investigating test results, it is likely easier to locate test
 Sample output:
 
 ```
-Total number of tests to run: 13
+Total number of tests to run: 2
 Test #1-1 - PASS - authenticate missing username and password
 Test #2-1 - PASS - authenticate missing password
 
@@ -199,16 +199,16 @@ Overall 2/2 tests passed.
 
 There are quite a lot of limitations. Here are some of them. Please feel free to send pull requests!
 
-* Unable to do 'partial' or 'wildcard' actual/expected result comparisons
-* Unable to do 'size of array' assertions, or only specific values'
 * Unable to POST files for bootstrap
+* Unable to do 'partial' or 'wildcard' actual/expected result comparisons
+* Unable to do 'size of array' assertions, or assertions on specific values
 * JSON input file has many `{}`, should allow YAML 1.2 input too since it's a superset of JSON
 * Ugly output on the console, no alternate output options
 * Uses douglascrockford's reference `org.json` package, with the [bad license](http://tanguy.ortolo.eu/blog/article46/json-license), could be replaced with the [AOSP's clean-room implementation](https://android.googlesource.com/platform/libcore/+/ics-plus-aosp/json?autodive=0)
 
-While it is not very good for running very specific, isolating tests, it should be good enough for testing the web service input validation at the very least.
+Depending on how you write your test cases, it may not be very good for running very specific, isolating tests. Nonetheless, it should be good enough for testing the web service input validation at the very least. If you write your test cases such that the output is fully specified, this might be very useful too.
 
-If you have multiple sets of data for your test cases, you may wish to create multiple input files, one for each set of data that you (manually) bootstrap.
+If you have multiple sets of data for your test cases, you may wish to create multiple input files, one for each set of data that you manually bootstrap before executing the test.
 
 ## Usage
 You will need to compile and run it with the dependencies in `/lib/`.
@@ -216,6 +216,8 @@ You will need to compile and run it with the dependencies in `/lib/`.
 Place the input JSON file in the your working directory. Run the `slocachecker.SlocaChecker` class with a single argument, the input file's filename.
 
 See the included `test-sample.json` for a complete example.
+
+You should be able to run these tests against your OpenShift gear, but keep in mind the 4-minute connection timeout by their reverse proxy. The connection timeout in this application's HTTP client has been raised to 4 minutes.
 
 ## Dependencies
 
@@ -225,4 +227,10 @@ Libraries are checked in for your convenience, until I figure out how to switch 
 * [Apache HttpComponents](http://hc.apache.org/) `HttpClient` as the HTTP agent
 * [Nimbus JOSE + JWT](http://connect2id.com/products/nimbus-jose-jwt) as used in `is203-jwt-v2.jar`, which relies on [json-smart](https://code.google.com/p/json-smart/)
 
+## Credits
+
 Inspired by [manuskc/API_Tester](https://github.com/manuskc/API_Tester)'s usage of a JSON file as input.
+
+## License
+
+Released under a MIT license. See the `LICENSE` file for details.
