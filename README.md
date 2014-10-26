@@ -59,6 +59,8 @@ Place the input JSON file in the your working directory. Run the `slocachecker.S
 
 ## Dependencies
 
+Libraries are checked in for your convenience, until I figure out how to switch to using Maven dependencies to fetch and keep these up to date.
+
 * [JSONassert](http://jsonassert.skyscreamer.org/) ([github](https://github.com/skyscreamer/jsonassert)) is used to compare JSONObjects. It relies on the `org.json` package, which can only be used for Good.
 * [Apache HttpComponents](http://hc.apache.org/) `HttpClient` as the HTTP agent
 * [Nimbus JOSE + JWT](http://connect2id.com/products/nimbus-jose-jwt) as used in `is203-jwt-v2.jar`, which relies on [json-smart](https://code.google.com/p/json-smart/).
