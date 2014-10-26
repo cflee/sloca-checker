@@ -53,7 +53,7 @@ post            | Boolean: true if request method should be POST, false if reque
 
 All other keys in the objects are treated as parameters for the POST or GET request. Values may be any valid JSON value, but they will be converted to String before being sent in the HTTP request.
 
-*Sample POST request:*
+**Sample POST request:**
 
 ```
 {
@@ -70,7 +70,7 @@ All other keys in the objects are treated as parameters for the POST or GET requ
 
 Note that it not only disables the token sending by setting `authenticate` to `false`, but also sets `post` to true.
 
-*Sample GET request without token:*
+**Sample GET request without token:**
 
 ```
 {
@@ -87,7 +87,7 @@ Note that it not only disables the token sending by setting `authenticate` to `f
 
 By setting `authenticate` to `false`, the automatically generated token is suppressed. If you don't provide a `token` key later, there won't be such a key sent entirely.
 
-*Sample GET request with static token:*
+**Sample GET request with static token:**
 
 ```
 {
@@ -171,7 +171,7 @@ There are several parts to this.
 
 First, there is the checker's standard line of test and check number, status, and description.
 
-Next, there is the message from the JSON object checker, that details the **differences** between what was expected and actually received.
+Next, there is the message from the JSON object checker, that details the *differences* between what was expected and actually received.
 
 This is followed by the full result that was expected and actually received, to easy troubleshooting.
 
