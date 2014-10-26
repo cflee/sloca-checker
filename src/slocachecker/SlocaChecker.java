@@ -18,15 +18,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-/**
- *
- * @author cflee
- */
 public class SlocaChecker {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         try {
             // check for minimum number of arguments, fail fast if missing
@@ -133,7 +126,6 @@ public class SlocaChecker {
                                 .execute().returnContent().asString();
                     } catch (URISyntaxException ex) {
                         Logger.getLogger(SlocaChecker.class.getName()).log(Level.SEVERE, null, ex);
-                        continue;
                     }
                 }
 
