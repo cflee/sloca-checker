@@ -18,7 +18,7 @@ Only JSON files are accepted for input at the moment.
 
 The file consists of an array of objects.
 
-### Configuration object
+### Config object
 
 The first object is special, as it specifies general configuration parameters for the test suite. They are defined as follows:
 
@@ -28,7 +28,7 @@ baseUrl         | Base URL, that should start with "http://" and end with a trai
 secret          | Secret that you use to sign and verify tokens. | "abcdefghijklmnop"
 adminUsername   | Username that you expect for your web services. | "admin"
 
-Sample:
+Sample config object:
 
 ```
 {
@@ -51,6 +51,60 @@ authenticate    | Boolean, true if token should be generated and sent, false oth
 post            | Boolean, true if request method should be POST, false if request should be GET | optional, default false (GET)
 
 All other keys in the objects are treated as parameters for the POST or GET request. Values may be any valid JSON value, but they will be converted to String before being sent in the HTTP request.
+
+Sample POST request:
+
+```
+{
+    "endpoint": "authenticate",
+    "authenticate": false,
+    "description": "authenticate missing password",
+    "post": true,
+    "result": {
+        "status": "error",
+        "messages": ["missing password"]
+    },
+    "username": "admin"
+}
+```
+
+Note that it not only disables the token sending by setting `authenticate` to `false`, but also sets `post` to true.
+
+Sample GET request without token:
+
+```
+{
+    "endpoint": "heatmap",
+    "description": "heatmap missing token",
+    "result": {
+        "status": "error",
+        "messages": ["missing token"]
+    },
+    "authenticate": false,
+    "date": "2014-01-01T00:00:00",
+    "floor": 1
+}
+```
+
+By setting `authenticate` to `false`, the automatically generated token is suppressed. If you don't provide a `token` key later, there won't be such a key sent entirely.
+
+Sample GET request with token:
+
+```
+{
+    "endpoint": "heatmap",
+    "description": "heatmap blank token",
+    "result": {
+        "status": "error",
+        "messages": ["blank token"]
+    },
+    "token": "",
+    "date": "2014-01-01T00:00:00",
+    "floor": 1
+}
+```
+
+Notice that even though `authenticate` is not set (and therefore at the default value of `true`), you can still override `token` field by specifying it.
 
 ## Usage
 You will need to compile and run it with the dependencies in `/lib/`.
