@@ -117,6 +117,10 @@ There are quite a lot of limitations. Here are some of them. Please feel free to
 * Ugly output on the console, no alternate output options
 * Uses douglascrockford's reference `org.json` package, with the [bad license](http://tanguy.ortolo.eu/blog/article46/json-license), could be replaced with the [AOSP's clean-room implementation](https://android.googlesource.com/platform/libcore/+/ics-plus-aosp/json?autodive=0)
 
+While it is not very good for running very specific, isolating tests, it should be good enough for testing the web service input validation at the very least.
+
+If you have multiple sets of data for your test cases, you may wish to create multiple input files, one for each set of data that you (manually) bootstrap.
+
 ## Usage
 You will need to compile and run it with the dependencies in `/lib/`.
 
@@ -126,7 +130,7 @@ Place the input JSON file in the your working directory. Run the `slocachecker.S
 
 Libraries are checked in for your convenience, until I figure out how to switch to using Maven dependencies to fetch and keep these up to date.
 
-* [JSONassert](http://jsonassert.skyscreamer.org/) ([github](https://github.com/skyscreamer/jsonassert)) is used to compare JSONObjects. It relies on the `org.json` package, which can only be used for Good.
+* [JSONassert](http://jsonassert.skyscreamer.org/) ([github](https://github.com/skyscreamer/jsonassert)) is used to compare JSONObjects. It relies on the `org.json` package, which can only be used for Good, and not Evil
 * [Apache HttpComponents](http://hc.apache.org/) `HttpClient` as the HTTP agent
-* [Nimbus JOSE + JWT](http://connect2id.com/products/nimbus-jose-jwt) as used in `is203-jwt-v2.jar`, which relies on [json-smart](https://code.google.com/p/json-smart/).
+* [Nimbus JOSE + JWT](http://connect2id.com/products/nimbus-jose-jwt) as used in `is203-jwt-v2.jar`, which relies on [json-smart](https://code.google.com/p/json-smart/)
 
