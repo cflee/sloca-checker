@@ -4,9 +4,7 @@ Very basic, very limited checker for SLOCA's JSON web services.
 
 ## Overview
 
-This checker takes in an input file that specifies configuration, and a set of tests to be run. It executes a POST or GET request to the specified endpoint, at the specified base URL, and compares the actual JSON output result with the expected output supplied in the test.
-
-A full and exact match (of the entire JSON object) is required to pass each test. Order of elements in JSON arrays is significant, while order of elements in JSON objects are ignored.
+This checker takes in an JSON input file that specifies configuration, and a set of tests to be run. For each test, it executes a POST or GET request to the specified endpoint, at the specified base URL, and runs one or more checks on the response.
 
 `is203-jwt-v2.jar` is integrated to allow testing of services even when the web service's authenticate service is not working properly. Tokens are automatically generated for requests, unless otherwise specified.
 
@@ -18,6 +16,8 @@ Only JSON files are accepted for input at the moment.
 
 The file consists of an array of objects, starting with the Config object, followed by one or more Test objects.
 
+All specified object keys are **case-sensitive**.
+
 ### Config object
 
 The first object is special, as it specifies general configuration parameters for the test suite. They are defined as follows:
@@ -25,16 +25,16 @@ The first object is special, as it specifies general configuration parameters fo
 Key             | Description       | Default value
 ----------------|-------------------|---------------
 baseUrl         | Base URL, that should start with "http://" and end with a trailing slash     | "http://localhost:8084/json/"
-secret          | Secret that you use to sign and verify tokens | "abcdefghijklmnop"
-adminUsername   | Username that you expect for your web services | "admin"
+secret          | Secret that your application uses to sign and verify tokens | "abcdefghijklmnop"
+adminUsername   | Username to be used when signing tokens | "admin"
 
 Sample config object:
 
 ```
 {
-    "baseUrl": "http://localhost:8084/json/",
-    "secret": "abcdefghijklmnop",
-    "adminUsername": "admin"
+    "baseUrl":"http://localhost:8084/json/",
+    "secret":"abcdefghijklmnop",
+    "adminUsername":"admin"
 }
 ```
 
@@ -45,15 +45,15 @@ Subsequent objects are all treated as test objects. They are defined as follows:
 Key             | Description       | Required?
 ----------------|-------------------|---------------
 endpoint        | String that should be appended to the Base URL | mandatory
-description     | String description of the test, to identify it | mandatory
-result          | JSON Object that is the expected result | mandatory
-checks          | JSON Array of Check objects | mandatory
-authenticate    | Boolean, true if token should be generated and sent, false otherwise | optional, default true
-post            | Boolean, true if request method should be POST, false if request should be GET | optional, default false (GET)
+description     | String description of the test, used only for output | mandatory
+result          | JSON object that is the expected result | mandatory
+checks          | JSON array of Check objects | mandatory
+authenticate    | Boolean: true if token should be generated and sent, false otherwise | optional, default true (send token)
+post            | Boolean: true if request method should be POST, false if request should be GET | optional, default false (GET)
 
 All other keys in the objects are treated as parameters for the POST or GET request. Values may be any valid JSON value, but they will be converted to String before being sent in the HTTP request.
 
-Sample POST request:
+*Sample POST request:*
 
 ```
 {
@@ -62,15 +62,7 @@ Sample POST request:
     "description":"authenticate missing password",
     "post":true,
     "checks":[
-        {
-            "type":"exact",
-            "value":{
-                "status":"error",
-                "messages":[
-                    "missing password"
-                ]
-            }
-        }
+        ... elided ...
     ],
     "username":"admin"
 }
@@ -78,22 +70,14 @@ Sample POST request:
 
 Note that it not only disables the token sending by setting `authenticate` to `false`, but also sets `post` to true.
 
-Sample GET request without token:
+*Sample GET request without token:*
 
 ```
 {
     "endpoint":"heatmap",
     "description":"heatmap missing token",
     "checks":[
-        {
-            "type":"exact",
-            "value":{
-                "status":"error",
-                "messages":[
-                    "missing token"
-                ]
-            }
-        }
+        ... elided ...
     ],
     "authenticate":false,
     "date":"2014-01-01T00:00:00",
@@ -103,22 +87,14 @@ Sample GET request without token:
 
 By setting `authenticate` to `false`, the automatically generated token is suppressed. If you don't provide a `token` key later, there won't be such a key sent entirely.
 
-Sample GET request with token:
+*Sample GET request with static token:*
 
 ```
 {
     "endpoint":"heatmap",
     "description":"heatmap blank token",
     "checks":[
-        {
-            "type":"exact",
-            "value":{
-                "status":"error",
-                "messages":[
-                    "blank token"
-                ]
-            }
-        }
+        ... elided ...
     ],
     "token":"",
     "date":"2014-01-01T00:00:00",
@@ -142,13 +118,20 @@ value           | Varies with check type | mandatory
 
 For now, only the `exact` check type is available.
 
-#### `exact` check
+#### exact check
 
 Key             | Description
 ----------------|-------------------
 type            | 'exact'
 key             | ignored, may be omitted
 value           | JSON object that is the expected result
+
+A full and exact match (of the entire JSON object) is required to pass. Criteria:
+
+* Order of elements in JSON arrays is significant
+* Order of elements in JSON objects is ignored
+* Extra, unexpected elements in JSON objects are rejected
+* All keys and values are case-sensitive
 
 Sample check object:
 
@@ -165,15 +148,32 @@ Sample check object:
 }
 ```
 
-Upon failure, this test type outputs the expected and actual JSON objects.
+Upon failure, this check type outputs the expected and actual JSON objects.
 
 Sample output:
 
 ```
-Test #10-0 - FAIL - heatmap blank floor
-    Expected result: {"messages":["blank floor"],"status":"error"}
-    Actual   result: {"messages":["blank floor","invalid token"],"status":"error"}
+Test #13-1 - FAIL - heatmap invalid floor non-numerical
+    Assertion error:
+    messages[0]
+    Expected: invalid floor
+         got: invalid token
+     ; status
+    Expected: success
+         got: error
+
+    Checker   error:
+    EXPECTED result: {"messages":["invalid floor"],"status":"success"}
+    ACTUAL   result: {"messages":["invalid token"],"status":"error"}
 ```
+
+There are several parts to this.
+
+First, there is the checker's standard line of test and check number, status, and description.
+
+Next, there is the message from the JSON object checker, that details the **differences** between what was expected and actually received.
+
+This is followed by the full result that was expected and actually received, to easy troubleshooting.
 
 ## Output format
 
