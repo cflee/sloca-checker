@@ -1,0 +1,14 @@
+# ignore nbproject
+nbproject/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
+*.class
+
+# whitelist files in nbproject
+!/nbproject/project.properties
+!/nbproject/project.xml
