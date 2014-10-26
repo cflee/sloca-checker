@@ -53,32 +53,36 @@ public class SlocaChecker {
             System.out.println("Total number of tests to run: " + (inputFileJsonArray.length() - 1));
             int numTestsPassed = 0;
 
-            for (int i = 1; i < inputFileJsonArray.length(); i++) {
-                JSONObject testData = inputFileJsonArray.getJSONObject(i);
+            for (int t = 1; t < inputFileJsonArray.length(); t++) {
+                JSONObject testData = inputFileJsonArray.getJSONObject(t);
 
                 String description = null;
                 String endpoint = null;
                 boolean needsAuthentication = false;
                 boolean isPost = false;
-                JSONObject expectedResult = null;
+
+                JSONArray checks = null;
 
                 String generatedToken = null;
                 String returnedResponse = null;
 
                 try {
+                    // retrieve all the test-specific parameters that we recognise
                     description = testData.getString("description");
                     endpoint = testData.getString("endpoint");
                     needsAuthentication = testData.optBoolean("authenticate", true);
                     isPost = testData.optBoolean("post");
-                    expectedResult = testData.getJSONObject("result");
+                    checks = testData.getJSONArray("checks");
 
+                    // remove them from the JSONObject, to avoid them being placed
+                    // into the GET or POST request later
                     testData.remove("description");
                     testData.remove("endpoint");
                     testData.remove("authenticate");
                     testData.remove("post");
-                    testData.remove("result");
+                    testData.remove("checks");
                 } catch (JSONException e) {
-                    System.out.println("Test #" + i + " - ERROR - Can't test, missing mandatory attribute(s)");
+                    System.out.println("Test #" + t + " - ERROR - Can't test, missing mandatory attribute(s)");
                     System.out.println("    Exception: " + e.getMessage());
                     continue;
                 }
@@ -87,6 +91,7 @@ public class SlocaChecker {
                     generatedToken = JWTUtility.sign(settings.get("secret"), settings.get("adminUsername"));
                 }
 
+                // obtain result
                 if (isPost) {
                     // perform a POST
 
@@ -125,24 +130,35 @@ public class SlocaChecker {
                                 .socketTimeout(240 * 1000)
                                 .execute().returnContent().asString();
                     } catch (URISyntaxException ex) {
+                        System.out.println("    There was a problem with the baseUrl/endpoint!");
                         Logger.getLogger(SlocaChecker.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
 
+                // process result
                 if (returnedResponse == null) {
                     System.out.println("    Unexpected error! No response to process.");
                 } else {
                     JSONObject actualResult = new JSONObject(returnedResponse);
 
-                    try {
-                        JSONAssert.assertEquals(expectedResult.toString(), returnedResponse, true);
+                    for (int c = 0; c < checks.length(); c++) {
+                        JSONObject check = checks.getJSONObject(c);
 
-                        System.out.println("Test #" + i + " - PASS - " + description);
-                        numTestsPassed++;
-                    } catch (AssertionError e) {
-                        System.out.println("Test #" + i + " - FAIL - " + description);
-                        System.out.println("    Expected result: " + expectedResult);
-                        System.out.println("    Actual   result: " + actualResult);
+                        if (check.getString("type").equals("exact")) {
+                            JSONObject expectedResult = check.getJSONObject("value");
+
+                            try {
+                                JSONAssert.assertEquals(expectedResult.toString(), returnedResponse, true);
+
+                                System.out.println("Test #" + t + "-" + (c + 1) + " - PASS - " + description);
+                                numTestsPassed++;
+                            } catch (AssertionError e) {
+                                System.out.println("Test #" + t + "-" + (c + 1) + " - FAIL - " + description);
+                                System.out.println("    Expected result: " + expectedResult);
+                                System.out.println("    Actual   result: " + actualResult);
+                            }
+                        }
+                        // TODO: other types of checks go here
                     }
                 }
             }
