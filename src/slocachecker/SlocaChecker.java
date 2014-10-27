@@ -82,8 +82,7 @@ public class SlocaChecker {
                     testData.remove("post");
                     testData.remove("checks");
                 } catch (JSONException e) {
-                    System.out.println("Test #" + t + " - ERROR - Can't test, missing mandatory attribute(s)");
-                    System.out.println("    Exception: " + e.getMessage());
+                    printException(t, "Can't test, missing mandatory attribute(s)", e);
                     continue;
                 }
 
@@ -91,32 +90,32 @@ public class SlocaChecker {
                     generatedToken = JWTUtility.sign(settings.get("secret"), settings.get("adminUsername"));
                 }
 
-                // obtain result
-                if (isPost) {
-                    // perform a POST
+                // send the request for this test, obtain result
+                try {
+                    if (isPost) {
+                        // perform a POST
+                        // figure out the parameters to be sent as POST payload
+                        // put in the token first, so that it can be overrided by the test file later
+                        Form form = Form.form();
+                        if (needsAuthentication) {
+                            form.add("token", generatedToken);
+                        }
+                        // grab all remaining key/value pairs and add to the "form"
+                        for (String key : (Set<String>) testData.keySet()) {
+                            form.add(key, testData.getString(key));
+                        }
 
-                    Form form = Form.form();
-                    // put in the token first, so that it can be overrided by the test file later
-                    if (needsAuthentication) {
-                        form.add("token", generatedToken);
-                    }
-                    // grab all remaining key/value pairs and add to the "form"
-                    for (String key : (Set<String>) testData.keySet()) {
-                        form.add(key, testData.getString(key));
-                    }
+                        // send HTTP POST request
+                        returnedResponse = Request.Post(settings.get("baseUrl") + endpoint)
+                                .socketTimeout(240 * 1000)
+                                .bodyForm(form.build())
+                                .execute().returnContent().asString();
 
-                    // send HTTP request
-                    returnedResponse = Request.Post(settings.get("baseUrl") + endpoint)
-                            .socketTimeout(240 * 1000)
-                            .bodyForm(form.build())
-                            .execute().returnContent().asString();
-                } else {
-                    try {
+                    } else {
                         // perform a GET
 
-                        URIBuilder uriBuilder = new URIBuilder(settings.get("baseUrl") + endpoint);
-
                         // put in the token first, so that it can be overrided by the test file later
+                        URIBuilder uriBuilder = new URIBuilder(settings.get("baseUrl") + endpoint);
                         if (needsAuthentication) {
                             uriBuilder.setParameter("token", generatedToken);
                         }
@@ -129,16 +128,17 @@ public class SlocaChecker {
                         returnedResponse = Request.Get(uriBuilder.build())
                                 .socketTimeout(240 * 1000)
                                 .execute().returnContent().asString();
-                    } catch (URISyntaxException ex) {
-                        System.out.println("    There was a problem with the baseUrl/endpoint!");
-                        Logger.getLogger(SlocaChecker.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                } catch (IOException e) {
+                    // HTTP client couldn't connect or send for whatever reason
+                    printException(t, "Could not connect to the web service!", e);
+                } catch (URISyntaxException e) {
+                    // problem with constructing the URIBuilder
+                    printException(t, "There was a problem with the baseUrl/endpoint!", e);
                 }
 
-                // process result
-                if (returnedResponse == null) {
-                    System.out.println("    Unexpected error! No response to process.");
-                } else {
+                // process checks against the result
+                if (returnedResponse != null) {
                     JSONObject actualResult = new JSONObject(returnedResponse);
 
                     for (int c = 0; c < checks.length(); c++) {
@@ -174,6 +174,12 @@ public class SlocaChecker {
             System.out.println("Error! Could not read from specified file.");
             Logger.getLogger(SlocaChecker.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private static void printException(int testNo, String message, Exception e) {
+        System.out.println("Test #" + testNo + " - ERROR");
+        System.out.print("    There was a problem connecting to the web service!");
+        System.out.println(e.getMessage().replaceAll("^|\r\n|\n", "\r\n    "));
     }
 
 }
