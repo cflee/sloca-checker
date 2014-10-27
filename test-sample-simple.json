@@ -114,7 +114,7 @@
     },
     {
         "endpoint":"heatmap",
-        "description":"heatmap invalid floor < 0",
+        "description":"heatmap invalid floor less than 0",
         "result":{
             "status":"error",
             "messages":["invalid floor"]
@@ -124,7 +124,7 @@
     },
     {
         "endpoint":"heatmap",
-        "description":"heatmap invalid floor > 10",
+        "description":"heatmap invalid floor more than 10",
         "result":{
             "status":"error",
             "messages":["invalid floor"]
