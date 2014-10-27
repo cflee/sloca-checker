@@ -38,7 +38,7 @@ public class SlocaChecker {
 
             // setup the default settings Map
             Map<String, String> settings = new HashMap<>();
-            settings.put("baseUrl", "https://localhost:8084/json/");
+            settings.put("baseUrl", "http://localhost:8084/json/");
             settings.put("secret", "abcdefghijklmnop");
             settings.put("adminUsername", "admin");
 
