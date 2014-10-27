@@ -45,7 +45,7 @@ public class SlocaChecker {
             // look for the settings in the first object. if found, overwrite in our settings map
             JSONObject inputFileConfigObject = inputFileJsonArray.getJSONObject(0);
             for (Map.Entry<String, String> entry : settings.entrySet()) {
-                if (!inputFileConfigObject.isNull(entry.getKey())) {
+                if (inputFileConfigObject.has(entry.getKey())) {
                     settings.put(entry.getKey(), inputFileConfigObject.getString(entry.getKey()));
                 }
             }
