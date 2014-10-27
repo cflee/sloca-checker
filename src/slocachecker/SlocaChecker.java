@@ -67,6 +67,9 @@ public class SlocaChecker {
                 boolean needsAuthentication = false;
                 boolean isPost = false;
 
+                // check0 is used for the 'result' key option
+                // checks is used for the 'checks' array of Check objects option
+                JSONObject check0 = null;
                 JSONArray checks = null;
 
                 String generatedToken = null;
@@ -80,7 +83,12 @@ public class SlocaChecker {
                     // optional keys
                     needsAuthentication = testData.optBoolean("authenticate", true);
                     isPost = testData.optBoolean("post");
-                    checks = testData.getJSONArray("checks");
+                    if (testData.has("checks")) {
+                        checks = testData.getJSONArray("checks");
+                    } else {
+                        // checks is not present, so the result key is mandatory
+                        check0 = testData.getJSONObject("result");
+                    }
 
                     // remove them from the JSONObject, to avoid them being placed
                     // into the GET or POST request later
@@ -89,6 +97,7 @@ public class SlocaChecker {
                     testData.remove("authenticate");
                     testData.remove("post");
                     testData.remove("checks");
+                    testData.remove("result");
                 } catch (JSONException e) {
                     printException(t, description, "Can't test, missing mandatory attribute(s)", e);
                     continue;
@@ -149,30 +158,35 @@ public class SlocaChecker {
                 // process checks against the result
                 if (returnedResponse != null) {
                     JSONObject actualResult = new JSONObject(returnedResponse);
+                    boolean failed = false;
 
-                    for (int c = 0; c < checks.length(); c++) {
-                        JSONObject check = checks.getJSONObject(c);
-
-                        if (check.getString("type").equals("exact")) {
-                            JSONObject expectedResult = check.getJSONObject("value");
-
-                            try {
-                                JSONAssert.assertEquals(expectedResult.toString(), returnedResponse, true);
-
-                                System.out.println("Test #" + t + "-" + (c + 1) + " - PASS - " + description);
-                                numTestsPassed++;
-                            } catch (AssertionError e) {
-                                System.out.println("Test #" + t + "-" + (c + 1) + " - FAIL - " + description);
-                                System.out.print("    Assertion details:");
-                                // don't print a newline for previous line as there will be one
-                                // extra from the following replaceAll to indent message by 4 spaces
-                                System.out.println(e.getMessage().replaceAll("^|\r\n|\n", "\r\n    "));
-                                System.out.println("    Checker   details:");
-                                System.out.println("    EXPECTED result: " + expectedResult);
-                                System.out.println("    ACTUAL   result: " + actualResult);
-                            }
+                    // perform the single 'result' check
+                    if (check0 != null) {
+                        JSONObject expectedResult = check0;
+                        if (!performExactCheck(t, 0, description, expectedResult, actualResult)) {
+                            failed = true;
                         }
-                        // TODO: other types of checks go here
+                    }
+
+                    // process the Check objects, only if that JSON array does exist!
+                    if (checks != null) {
+                        for (int c = 0; c < checks.length(); c++) {
+                            JSONObject check = checks.getJSONObject(c);
+
+                            if (check.getString("type").equals("exact")) {
+                                JSONObject expectedResult = check.getJSONObject("value");
+
+                                if (!performExactCheck(t, c, description, expectedResult, actualResult)) {
+                                    failed = true;
+                                }
+                            }
+                            // TODO: other types of checks go here
+                        }
+                    }
+
+                    // increment the counter only if all checks for this test passed
+                    if (!failed) {
+                        numTestsPassed++;
                     }
                 }
             }
