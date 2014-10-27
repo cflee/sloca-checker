@@ -163,11 +163,11 @@ public class SlocaChecker {
                                 numTestsPassed++;
                             } catch (AssertionError e) {
                                 System.out.println("Test #" + t + "-" + (c + 1) + " - FAIL - " + description);
-                                System.out.print("    Assertion error:");
+                                System.out.print("    Assertion details:");
                                 // don't print a newline for previous line as there will be one
                                 // extra from the following replaceAll to indent message by 4 spaces
                                 System.out.println(e.getMessage().replaceAll("^|\r\n|\n", "\r\n    "));
-                                System.out.println("    Checker   error:");
+                                System.out.println("    Checker   details:");
                                 System.out.println("    EXPECTED result: " + expectedResult);
                                 System.out.println("    ACTUAL   result: " + actualResult);
                             }
