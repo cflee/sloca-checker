@@ -10,11 +10,15 @@ This checker takes in an JSON input file that specifies configuration, and a set
 
 All requests are GET requests, unless otherwise specified.
 
+There are two 'modes' of usage, as decided by how you choose to write your JSON input files. In the _simple_ mode, the functionality is similar to the official jsonchecker, in that it makes a single web service request, and just compares entire JSON objects. In the _complex_ (or advanced) mode, the file format allows specifying multiple and advanced checks to be run on a single web service request.
+
 ## Input file format
 
 Only JSON files are accepted for input at the moment.
 
-The file consists of an array of objects, starting with the Config object, followed by one or more Test objects.
+The file consists of an array of objects, starting with the Config object, followed by one or more Test objects. The Config object must be the first object in the array.
+
+In the _simple_ mode, the Test objects only contain a single expected `result`. In the _complex_ mode, the Test objects contain multiple Check objects that specify the checks to be run against the response.
 
 All specified object keys are **case-sensitive**.
 
@@ -27,6 +31,8 @@ Key             | Description       | Default value
 baseUrl         | Base URL, that should start with "http://" and end with a trailing slash     | "http://localhost:8084/json/"
 secret          | Secret that your application uses to sign and verify tokens | "abcdefghijklmnop"
 adminUsername   | Username to be used when signing tokens | "admin"
+
+All parameters are case-sensitive, apart from the protocol (`http`) and the hostname (`localhost`).
 
 Sample config object:
 
@@ -46,12 +52,18 @@ Key             | Description       | Required?
 ----------------|-------------------|---------------
 endpoint        | String that should be appended to the Base URL | mandatory
 description     | String description of the test, used only for output | mandatory
-result          | JSON object that is the expected result | mandatory
-checks          | JSON array of Check objects | mandatory
+result          | JSON object that is the expected result | mandatory if `checks` is not specified
+checks          | JSON array of Check objects | mandatory if `result` is not specified
 authenticate    | Boolean: true if token should be generated and sent, false otherwise | optional, default true (send token)
 post            | Boolean: true if request method should be POST, false if request should be GET | optional, default false (GET)
 
+**At least one** of `result` or `checks` keys must be provided.
+
+Note that the `result` and `checks` keys are not mutually exclusive. You may include both, and the `result` value will be taken as check #0 with 'exact' check type.
+
 All other keys in the objects are treated as parameters for the POST or GET request. Values may be any valid JSON value, but they will be converted to String before being sent in the HTTP request.
+
+Handling of JSON arrays as a URL value is not defined, `["year","gender"]` will likely end up exactly like that instead of `year,gender`, so specify that exact String instead.
 
 **Sample POST request:**
 
@@ -61,14 +73,14 @@ All other keys in the objects are treated as parameters for the POST or GET requ
     "authenticate":false,
     "description":"authenticate missing password",
     "post":true,
-    "checks":[
+    "result":{
         ... elided ...
-    ],
+    },
     "username":"admin"
 }
 ```
 
-Note that it not only disables the token sending by setting `authenticate` to `false`, but also sets `post` to true.
+Note that `post` is set to `true`. By default, requests are made using the GET method.
 
 **Sample GET request without token:**
 
@@ -76,9 +88,9 @@ Note that it not only disables the token sending by setting `authenticate` to `f
 {
     "endpoint":"heatmap",
     "description":"heatmap missing token",
-    "checks":[
+    "result":{
         ... elided ...
-    ],
+    },
     "authenticate":false,
     "date":"2014-01-01T00:00:00",
     "floor":1
@@ -93,6 +105,23 @@ By setting `authenticate` to `false`, the automatically generated token is suppr
 {
     "endpoint":"heatmap",
     "description":"heatmap blank token",
+    "result":{
+        ... elided ...
+    },
+    "token":"",
+    "date":"2014-01-01T00:00:00",
+    "floor":1
+}
+```
+
+Even though `authenticate` is not set (and therefore at the default value of `true`, so a token is generated for you), you can still override `token` field by specifying it.
+
+**Using the complex mode:**
+
+```
+{
+    "endpoint":"heatmap",
+    "description":"heatmap blank token",
     "checks":[
         ... elided ...
     ],
@@ -102,7 +131,7 @@ By setting `authenticate` to `false`, the automatically generated token is suppr
 }
 ```
 
-Notice that even though `authenticate` is not set (and therefore at the default value of `true`), you can still override `token` field by specifying it. Remember, ordering within an JSON object is not significant, this sample's order is just specified for easy reading.
+Just add a `checks` array of Check objects (as specified below) to the Test object.
 
 ### Check object
 
@@ -154,7 +183,7 @@ Upon failure, this check type outputs the expected and actual JSON objects.
 
 ```
 Test #13-1 - FAIL - heatmap invalid floor non-numerical
-    Assertion error:
+    Assertion details:
     messages[0]
     Expected: invalid floor
          got: invalid token
@@ -162,7 +191,7 @@ Test #13-1 - FAIL - heatmap invalid floor non-numerical
     Expected: success
          got: error
 
-    Checker   error:
+    Checker   details:
     EXPECTED result: {"messages":["invalid floor"],"status":"success"}
     ACTUAL   result: {"messages":["invalid token"],"status":"error"}
 ```
@@ -171,7 +200,7 @@ There are several parts to this.
 
 First, there is the checker's standard line of test and check number, status, and description.
 
-Next, there is the message from the JSON object checker, that details the *differences* between what was expected and actually received. It may be a little cryptic.
+Next, there is the message from the JSON object checker, that details the *differences* between what was expected and actually received. This output may be a little cryptic, so it is more useful just to identify which part of a long response is different.
 
 This is followed by the full result that was expected and actually received, for make benefit easy troubleshooting.
 
@@ -185,7 +214,17 @@ More details may follow in the case of a `FAIL` result, as specified per check t
 
 Nonetheless, when investigating test results, it is likely easier to locate test objects by the (mandatory) description string, then look for the corresponding check object.
 
-Sample output:
+**Sample output in simple mode:**
+
+```
+Total number of tests to run: 2
+Test #1-0 - PASS - authenticate missing username and password
+Test #2-0 - PASS - authenticate missing password
+
+Overall 2/2 tests passed.
+```
+
+**Sample output in complex mode:**
 
 ```
 Total number of tests to run: 2
