@@ -176,7 +176,9 @@ public class SlocaChecker {
                             if (check.getString("type").equals("exact")) {
                                 JSONObject expectedResult = check.getJSONObject("value");
 
-                                if (!performExactCheck(t, c, description, expectedResult, actualResult)) {
+                                // add one to the check #, because for user-friendliness, start counting from 1!
+                                // also because 0 is reserved for the single 'result' check
+                                if (!performExactCheck(t, c + 1, description, expectedResult, actualResult)) {
                                     failed = true;
                                 }
                             }
