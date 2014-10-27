@@ -53,6 +53,7 @@ public class SlocaChecker {
             // TOOD: add some validation of the user-specified settings here (eg baseUrl endsWith /)
             // keep track of the total number of tests to be run, and tests passed
             System.out.println("Total number of tests to run: " + (inputFileJsonArray.length() - 1));
+            System.out.println();
             int numTestsPassed = 0;
 
             // iterate through all the Test objects, skipping the Config object
@@ -101,7 +102,7 @@ public class SlocaChecker {
                 // send the request for this test, obtain result
                 try {
                     if (isPost) {
-                        // perform a POST
+                        // perform a POST request
                         // figure out the parameters to be sent as POST payload
                         // put in the token first, so that it can be overrided by the test file later
                         Form form = Form.form();
@@ -118,10 +119,9 @@ public class SlocaChecker {
                                 .socketTimeout(240 * 1000)
                                 .bodyForm(form.build())
                                 .execute().returnContent().asString();
-
                     } else {
-                        // perform a GET
-
+                        // perform a GET request
+                        // figure out the parameters to go into the query string
                         // put in the token first, so that it can be overrided by the test file later
                         URIBuilder uriBuilder = new URIBuilder(settings.get("baseUrl") + endpoint);
                         if (needsAuthentication) {
@@ -178,11 +178,44 @@ public class SlocaChecker {
             }
 
             System.out.println();
-            System.out.println("Overall " + numTestsPassed + "/" + (inputFileJsonArray.length() - 1) + " tests passed.");
+            System.out.println("Overall " + numTestsPassed + "/" + (inputFileJsonArray.length() - 1)
+                    + " tests passed.");
         } catch (IOException ex) {
             System.out.println("Error! Could not read from specified file.");
             Logger.getLogger(SlocaChecker.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    /**
+     * Perform an 'exact' type check between two JSONObjects, printing the result to the console. Note that this method
+     * both prints output to the console as well as returns a boolean value! It is a little strange for a non-void
+     * return type method.
+     *
+     * @param testNo Test # (should start from 1)
+     * @param checkNo Check # (should start from 1 if from Check object, 0 from result)
+     * @param testDescription test description
+     * @param expected expected JSONObject
+     * @param actual actual JSONObject
+     * @return true if passed check, false otherwise
+     */
+    private static boolean performExactCheck(int testNo, int checkNo, String testDescription,
+            JSONObject expected, JSONObject actual) {
+        try {
+            JSONAssert.assertEquals(expected.toString(), actual, true);
+
+            System.out.println("Test #" + testNo + "-" + checkNo + " - PASS - " + testDescription);
+            return true;
+        } catch (AssertionError e) {
+            System.out.println("Test #" + testNo + "-" + checkNo + " - FAIL - " + testDescription);
+            System.out.print("    Assertion details:");
+            // don't print a newline for previous line as there will be one
+            // extra from the following replaceAll to indent message by 4 spaces
+            System.out.println(e.getMessage().replaceAll("^|\r\n|\n", "\r\n    "));
+            System.out.println("    Checker   details:");
+            System.out.println("    EXPECTED result: " + expected);
+            System.out.println("    ACTUAL   result: " + actual);
+        }
+        return false;
     }
 
     private static void printException(int testNo, String testDescription, String message, Exception e) {
