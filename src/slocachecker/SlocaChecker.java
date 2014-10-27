@@ -188,7 +188,13 @@ public class SlocaChecker {
     private static void printException(int testNo, String testDescription, String message, Exception e) {
         System.out.println("Test #" + testNo + " - ERROR - " + testDescription);
         System.out.print("    " + message);
-        System.out.println(e.getMessage().replaceAll("^|\r\n|\n", "\r\n    "));
+        if (e.getMessage() != null) {
+            System.out.println(e.getMessage().replaceAll("^|\r\n|\n", "\r\n    "));
+        } else {
+            // send a newline for after the message
+            System.out.println(("Exception class: " + e.toString())
+                    .replaceAll("^|\r\n|\n", "\r\n    "));
+        }
     }
 
 }
