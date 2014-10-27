@@ -137,7 +137,7 @@ public class SlocaChecker {
                                 .socketTimeout(240 * 1000)
                                 .execute().returnContent().asString();
                     }
-                } catch (IOException e) {
+                } catch (IOException | IllegalArgumentException e) {
                     // HTTP client couldn't connect or send for whatever reason
                     printException(t, description, "Could not connect to the web service!", e);
                 } catch (URISyntaxException e) {
