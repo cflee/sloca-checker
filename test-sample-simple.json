@@ -55,7 +55,7 @@
         "post":true,
         "result":{
             "status":"success",
-            "token":"<some token>"
+            "token":"someToken"
         },
         "username":"zorro.fan.2010",
         "password":"zxcvbn1284"
