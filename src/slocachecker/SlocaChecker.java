@@ -89,7 +89,7 @@ public class SlocaChecker {
                     testData.remove("post");
                     testData.remove("checks");
                 } catch (JSONException e) {
-                    printException(t, "Can't test, missing mandatory attribute(s)", e);
+                    printException(t, description, "Can't test, missing mandatory attribute(s)", e);
                     continue;
                 }
 
@@ -139,10 +139,11 @@ public class SlocaChecker {
                     }
                 } catch (IOException e) {
                     // HTTP client couldn't connect or send for whatever reason
-                    printException(t, "Could not connect to the web service!", e);
+                    printException(t, description, "Could not connect to the web service!", e);
                 } catch (URISyntaxException e) {
                     // problem with constructing the URIBuilder
-                    printException(t, "There was a problem with the baseUrl/endpoint!", e);
+                    // (this is the Apache HttpComponents URIBuilder, not Java EE)
+                    printException(t, description, "There was a problem with the baseUrl/endpoint!", e);
                 }
 
                 // process checks against the result
@@ -184,9 +185,9 @@ public class SlocaChecker {
         }
     }
 
-    private static void printException(int testNo, String message, Exception e) {
-        System.out.println("Test #" + testNo + " - ERROR");
-        System.out.print("    There was a problem connecting to the web service!");
+    private static void printException(int testNo, String testDescription, String message, Exception e) {
+        System.out.println("Test #" + testNo + " - ERROR - " + testDescription);
+        System.out.print("    " + message);
         System.out.println(e.getMessage().replaceAll("^|\r\n|\n", "\r\n    "));
     }
 
