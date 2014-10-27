@@ -50,12 +50,17 @@ public class SlocaChecker {
                 }
             }
 
+            // TOOD: add some validation of the user-specified settings here (eg baseUrl endsWith /)
+            // keep track of the total number of tests to be run, and tests passed
             System.out.println("Total number of tests to run: " + (inputFileJsonArray.length() - 1));
             int numTestsPassed = 0;
 
+            // iterate through all the Test objects, skipping the Config object
             for (int t = 1; t < inputFileJsonArray.length(); t++) {
+                // retrieve the Test object
                 JSONObject testData = inputFileJsonArray.getJSONObject(t);
 
+                // extract data from the Test object
                 String description = null;
                 String endpoint = null;
                 boolean needsAuthentication = false;
@@ -68,8 +73,10 @@ public class SlocaChecker {
 
                 try {
                     // retrieve all the test-specific parameters that we recognise
+                    // mandatory keys
                     description = testData.getString("description");
                     endpoint = testData.getString("endpoint");
+                    // optional keys
                     needsAuthentication = testData.optBoolean("authenticate", true);
                     isPost = testData.optBoolean("post");
                     checks = testData.getJSONArray("checks");
@@ -86,6 +93,7 @@ public class SlocaChecker {
                     continue;
                 }
 
+                // centralise the token generation here
                 if (needsAuthentication) {
                     generatedToken = JWTUtility.sign(settings.get("secret"), settings.get("adminUsername"));
                 }
