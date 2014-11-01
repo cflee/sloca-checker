@@ -163,9 +163,16 @@ public class SlocaChecker {
 
                     // perform the single 'result' check
                     if (check0 != null) {
-                        JSONObject expectedResult = check0;
-                        if (!performExactCheck(t, 0, description, expectedResult, actualResult)) {
-                            failed = true;
+                        if (endpoint.equals("authenticate")) {
+                            // special case for authenticate endpoint
+                            if (!performAuthenticateCheck(t, 0, description, check0, actualResult)) {
+                                failed = true;
+                            }
+                        } else {
+                            // regular endpoints
+                            if (!performExactCheck(t, 0, description, check0, actualResult)) {
+                                failed = true;
+                            }
                         }
                     }
 
@@ -177,10 +184,17 @@ public class SlocaChecker {
                             if (check.getString("type").equals("exact")) {
                                 JSONObject expectedResult = check.getJSONObject("value");
 
+
                                 // add one to the check #, because for user-friendliness, start counting from 1!
                                 // also because 0 is reserved for the single 'result' check
-                                if (!performExactCheck(t, c + 1, description, expectedResult, actualResult)) {
-                                    failed = true;
+                                if (endpoint.equals("authenticate")) {
+                                    if (!performAuthenticateCheck(t, c + 1, description, expectedResult, actualResult)) {
+                                        failed = true;
+                                    }
+                                } else {
+                                    if (!performExactCheck(t, c + 1, description, expectedResult, actualResult)) {
+                                        failed = true;
+                                    }
                                 }
                             }
                             // TODO: other types of checks go here
@@ -233,6 +247,25 @@ public class SlocaChecker {
             System.out.println("    ACTUAL   result: " + actual);
         }
         return false;
+    }
+
+    private static boolean performAuthenticateCheck(int testNo, int checkNo, String testDescription,
+                                             JSONObject expected, JSONObject actual) {
+        if (expected.has("status") && expected.getString("status").equals("success")) {
+            // we expect a successful token response
+            if (actual.has("status") && actual.getString("status").equals("success")
+                    && actual.has("token") && !actual.getString("token").isEmpty()) {
+                // actual response has status = success
+                // and there is a token key, with non-empty value
+                // PASS
+                System.out.println("Test #" + testNo + "-" + checkNo + " - PASS - " + testDescription);
+                return true;
+            }
+        }
+
+        // we don't expect a successful token response, so we compare exactly
+        // delegate to the exact check method
+        return performExactCheck(testNo, checkNo, testDescription, expected, actual);
     }
 
     private static void printException(int testNo, String testDescription, String message, Exception e) {
