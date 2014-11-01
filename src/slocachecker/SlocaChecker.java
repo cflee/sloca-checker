@@ -189,17 +189,16 @@ public class SlocaChecker {
                             if (check.getString("type").equals("exact")) {
                                 JSONObject expectedResult = check.getJSONObject("value");
 
-
                                 // add one to the check #, because for user-friendliness, start counting from 1!
                                 // also because 0 is reserved for the single 'result' check
-                                if (endpoint.equals("authenticate")) {
-                                    if (!performAuthenticateCheck(t, c + 1, description, expectedResult, actualResult)) {
-                                        failed = true;
-                                    }
-                                } else {
-                                    if (!performExactCheck(t, c + 1, description, expectedResult, actualResult)) {
-                                        failed = true;
-                                    }
+                                if (!performExactCheck(t, c + 1, description, expectedResult, actualResult)) {
+                                    failed = true;
+                                }
+                            } else if (check.getString("type").equals("authenticate")) {
+                                JSONObject expectedResult = check.getJSONObject("value");
+
+                                if (!performAuthenticateCheck(t, c + 1, description, expectedResult, actualResult)) {
+                                    failed = true;
                                 }
                             }
                             // TODO: other types of checks go here

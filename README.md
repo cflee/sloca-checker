@@ -59,7 +59,7 @@ post            | Boolean: true if request method should be POST, false if reque
 
 **At least one** of `result` or `checks` keys must be provided.
 
-Note that the `result` and `checks` keys are not mutually exclusive. You may include both, and the `result` value will be taken as check #0 with 'exact' check type.
+Note that the `result` and `checks` keys are not mutually exclusive. You may include both, and the `result` value will be taken as check #0 with 'exact' check type, _except if endpoint is 'authenticate' (case-sensitive), in which case the 'authenticate' check type will automatically be selected_.
 
 All other keys in the objects are treated as parameters for the POST or GET request. Values may be any valid JSON value, but they will be converted to String before being sent in the HTTP request.
 
@@ -203,6 +203,18 @@ First, there is the checker's standard line of test and check number, status, an
 Next, there is the message from the JSON object checker, that details the *differences* between what was expected and actually received. This output may be a little cryptic, so it is more useful just to identify which part of a long response is different.
 
 This is followed by the full result that was expected and actually received, for make benefit easy troubleshooting.
+
+#### authenticate check
+
+Key             | Description
+----------------|-------------------
+type            | 'authenticate'
+key             | ignored, may be omitted
+value           | JSON object that is the expected result
+
+When the expected (`value`) JSON object's `status` is present and is equals to 'success', then this check passes if and only if the `token` is present and non-empty.
+
+Otherwise, it falls back to the 'exact' check above.
 
 ## Output format
 
