@@ -3,6 +3,7 @@ package slocachecker;
 import is203.JWTUtility;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class SlocaChecker {
 
             // read all lines from file and concat into a string for JSONArray constructor parser
             StringBuilder inputFileSB = new StringBuilder();
-            for (String line : Files.readAllLines(Paths.get(args[0]))) {
+            for (String line : Files.readAllLines(Paths.get(args[0]), Charset.defaultCharset())) {
                 inputFileSB.append(line);
             }
             JSONArray inputFileJsonArray = new JSONArray(inputFileSB.toString());
