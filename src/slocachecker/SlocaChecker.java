@@ -158,7 +158,12 @@ public class SlocaChecker {
 
                 // process checks against the result
                 if (returnedResponse != null) {
-                    JSONObject actualResult = new JSONObject(returnedResponse);
+                    JSONObject actualResult = new JSONObject();
+                    try {
+                        actualResult = new JSONObject(returnedResponse);
+                    } catch (JSONException e) {
+                        printException(t, description, "Could not parse returned response", e);
+                    }
                     boolean failed = false;
 
                     // perform the single 'result' check
