@@ -64,9 +64,9 @@ public class SlocaChecker {
 
                 // extract data from the Test object
                 String description = null;
-                String endpoint = null;
-                boolean needsAuthentication = false;
-                boolean isPost = false;
+                String endpoint;
+                boolean needsAuthentication;
+                boolean isPost;
 
                 // check0 is used for the 'result' key option
                 // checks is used for the 'checks' array of Check objects option
@@ -232,7 +232,7 @@ public class SlocaChecker {
     private static boolean performExactCheck(int testNo, int checkNo, String testDescription,
             JSONObject expected, JSONObject actual) {
         try {
-            JSONAssert.assertEquals(expected.toString(), actual, true);
+            JSONAssert.assertEquals(expected, actual, true);
 
             System.out.println("Test #" + testNo + "-" + checkNo + " - PASS - " + testDescription);
             return true;
