@@ -51,6 +51,12 @@ public class SlocaChecker {
                 }
             }
 
+            // allow override of baseUrl by second argument
+            if (args.length == 2) {
+                settings.put("baseUrl", args[1]);
+                System.out.println("!!! baseUrl overridden: " + args[1]);
+            }
+
             // TOOD: add some validation of the user-specified settings here (eg baseUrl endsWith /)
             // keep track of the total number of tests to be run, and tests passed
             System.out.println("Total number of tests to run: " + (inputFileJsonArray.length() - 1));
