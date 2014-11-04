@@ -165,50 +165,51 @@ public class SlocaChecker {
                 // process checks against the result
                 if (returnedResponse != null) {
                     JSONObject actualResult = new JSONObject();
-                    try {
-                        actualResult = new JSONObject(returnedResponse);
-                    } catch (JSONException e) {
-                        printException(t, description, "Could not parse returned response", e);
-                    }
                     boolean failed = false;
 
-                    // perform the single 'result' check
-                    if (check0 != null) {
-                        if (endpoint.equals("authenticate")) {
-                            // special case for authenticate endpoint
-                            if (!performAuthenticateCheck(t, 0, description, check0, actualResult)) {
-                                failed = true;
-                            }
-                        } else {
-                            // regular endpoints
-                            if (!performExactCheck(t, 0, description, check0, actualResult)) {
-                                failed = true;
-                            }
-                        }
-                    }
+                    try {
+                        actualResult = new JSONObject(returnedResponse);
 
-                    // process the Check objects, only if that JSON array does exist!
-                    if (checks != null) {
-                        for (int c = 0; c < checks.length(); c++) {
-                            JSONObject check = checks.getJSONObject(c);
-
-                            if (check.getString("type").equals("exact")) {
-                                JSONObject expectedResult = check.getJSONObject("value");
-
-                                // add one to the check #, because for user-friendliness, start counting from 1!
-                                // also because 0 is reserved for the single 'result' check
-                                if (!performExactCheck(t, c + 1, description, expectedResult, actualResult)) {
+                        // perform the single 'result' check
+                        if (check0 != null) {
+                            if (endpoint.equals("authenticate")) {
+                                // special case for authenticate endpoint
+                                if (!performAuthenticateCheck(t, 0, description, check0, actualResult)) {
                                     failed = true;
                                 }
-                            } else if (check.getString("type").equals("authenticate")) {
-                                JSONObject expectedResult = check.getJSONObject("value");
-
-                                if (!performAuthenticateCheck(t, c + 1, description, expectedResult, actualResult)) {
+                            } else {
+                                // regular endpoints
+                                if (!performExactCheck(t, 0, description, check0, actualResult)) {
                                     failed = true;
                                 }
                             }
-                            // TODO: other types of checks go here
                         }
+
+                        // process the Check objects, only if that JSON array does exist!
+                        if (checks != null) {
+                            for (int c = 0; c < checks.length(); c++) {
+                                JSONObject check = checks.getJSONObject(c);
+
+                                if (check.getString("type").equals("exact")) {
+                                    JSONObject expectedResult = check.getJSONObject("value");
+
+                                    // add one to the check #, because for user-friendliness, start counting from 1!
+                                    // also because 0 is reserved for the single 'result' check
+                                    if (!performExactCheck(t, c + 1, description, expectedResult, actualResult)) {
+                                        failed = true;
+                                    }
+                                } else if (check.getString("type").equals("authenticate")) {
+                                    JSONObject expectedResult = check.getJSONObject("value");
+
+                                    if (!performAuthenticateCheck(t, c + 1, description, expectedResult, actualResult)) {
+                                        failed = true;
+                                    }
+                                }
+                                // TODO: other types of checks go here
+                            }
+                        }
+                    } catch (JSONException e) {
+                        printException(t, description, "Could not parse returned response", e);
                     }
 
                     // increment the counter only if all checks for this test passed
