@@ -1,6 +1,7 @@
 package slocachecker;
 
 import is203.JWTUtility;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.apache.http.client.fluent.Form;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.utils.URIBuilder;
@@ -222,8 +224,9 @@ public class SlocaChecker {
             System.out.println();
             System.out.println("Overall " + numTestsPassed + "/" + (inputFileJsonArray.length() - 1)
                     + " tests passed.");
+            System.out.println();
         } catch (IOException ex) {
-            System.out.println("Error! Could not read from specified file.");
+            System.out.println("Error! Could not read from specified input file.");
             Logger.getLogger(SlocaChecker.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -233,15 +236,15 @@ public class SlocaChecker {
      * both prints output to the console as well as returns a boolean value! It is a little strange for a non-void
      * return type method.
      *
-     * @param testNo Test # (should start from 1)
-     * @param checkNo Check # (should start from 1 if from Check object, 0 from result)
+     * @param testNo          Test # (should start from 1)
+     * @param checkNo         Check # (should start from 1 if from Check object, 0 from result)
      * @param testDescription test description
-     * @param expected expected JSONObject
-     * @param actual actual JSONObject
+     * @param expected        expected JSONObject
+     * @param actual          actual JSONObject
      * @return true if passed check, false otherwise
      */
     private static boolean performExactCheck(int testNo, int checkNo, String testDescription,
-            JSONObject expected, JSONObject actual) {
+                                             JSONObject expected, JSONObject actual) {
         try {
             JSONAssert.assertEquals(expected, actual, true);
 
@@ -261,7 +264,7 @@ public class SlocaChecker {
     }
 
     private static boolean performAuthenticateCheck(int testNo, int checkNo, String testDescription,
-                                             JSONObject expected, JSONObject actual) {
+                                                    JSONObject expected, JSONObject actual) {
         if (expected.has("status") && expected.getString("status").equals("success")) {
             // we expect a successful token response
             if (actual.has("status") && actual.getString("status").equals("success")
