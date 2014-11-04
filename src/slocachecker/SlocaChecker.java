@@ -2,6 +2,7 @@ package slocachecker;
 
 import is203.JWTUtility;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -13,9 +14,17 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.client.fluent.Form;
 import org.apache.http.client.fluent.Request;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -121,22 +130,59 @@ public class SlocaChecker {
                 try {
                     if (isPost) {
                         // perform a POST request
-                        // figure out the parameters to be sent as POST payload
-                        // put in the token first, so that it can be overrided by the test file later
-                        Form form = Form.form();
-                        if (needsAuthentication) {
-                            form.add("token", generatedToken);
-                        }
-                        // grab all remaining key/value pairs and add to the "form"
-                        for (String key : (Set<String>) testData.keySet()) {
-                            form.add(key, testData.getString(key));
-                        }
+                        if (testData.has("bootstrap-file")) {
+                            // need to do a multipart form post with just the file
+                            // and the token
 
-                        // send HTTP POST request
-                        returnedResponse = Request.Post(settings.get("baseUrl") + endpoint)
-                                .socketTimeout(240 * 1000)
-                                .bodyForm(form.build())
-                                .execute().returnContent().asString();
+                            // create client
+                            CloseableHttpClient httpclient = HttpClients.createDefault();
+
+                            // create Post object
+                            HttpPost httpPost = new HttpPost(settings.get("baseUrl") + endpoint);
+
+                            // settle the bootstrap file contents for the Post
+                            File bootstrapFile = new File(testData.getString("bootstrap-file"));
+                            FileBody bin = new FileBody(bootstrapFile);
+                            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
+                                    .addPart("bootstrap-file", bin);
+
+                            // add the token if necessary
+                            if (needsAuthentication) {
+                                entityBuilder.addTextBody("token", generatedToken);
+                            }
+
+                            // grab all remaining key/value pairs and add
+                            for (String key : (Set<String>) testData.keySet()) {
+                                entityBuilder.addTextBody(key, testData.getString(key));
+                            }
+
+                            HttpEntity reqEntity = entityBuilder.build();
+                            httpPost.setEntity(reqEntity);
+
+                            // send POST request and get the response
+                            HttpEntity returnedEntity = httpclient.execute(httpPost).getEntity();
+                            returnedResponse = EntityUtils.toString(returnedEntity);
+
+                            // cleanup
+                            EntityUtils.consume(returnedEntity);
+                        } else {
+                            // figure out the parameters to be sent as urlencoded POST payload
+                            // put in the token first, so that it can be overrided by the test file later
+                            Form form = Form.form();
+                            if (needsAuthentication) {
+                                form.add("token", generatedToken);
+                            }
+                            // grab all remaining key/value pairs and add to the "form"
+                            for (String key : (Set<String>) testData.keySet()) {
+                                form.add(key, testData.getString(key));
+                            }
+
+                            // send HTTP POST request
+                            returnedResponse = Request.Post(settings.get("baseUrl") + endpoint)
+                                    .socketTimeout(240 * 1000)
+                                    .bodyForm(form.build())
+                                    .execute().returnContent().asString();
+                        }
                     } else {
                         // perform a GET request
                         // figure out the parameters to go into the query string
