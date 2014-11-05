@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.fluent.Form;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -212,7 +211,7 @@ public class SlocaChecker {
 
                 // process checks against the result
                 if (returnedResponse != null) {
-                    JSONObject actualResult = new JSONObject();
+                    JSONObject actualResult;
                     boolean failed = false;
 
                     try {
