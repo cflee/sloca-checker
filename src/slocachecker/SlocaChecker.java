@@ -72,6 +72,7 @@ public class SlocaChecker {
             System.out.println("Total number of tests to run: " + (inputFileJsonArray.length() - 1));
             System.out.println();
             int numTestsPassed = 0;
+            String obtainedToken = "";
 
             // iterate through all the Test objects, skipping the Config object
             for (int t = 1; t < inputFileJsonArray.length(); t++) {
@@ -221,7 +222,12 @@ public class SlocaChecker {
                         if (check0 != null) {
                             if (endpoint.equals("authenticate")) {
                                 // special case for authenticate endpoint
-                                if (!performAuthenticateCheck(t, 0, description, check0, actualResult)) {
+                                if (performAuthenticateCheck(t, 0, description, check0, actualResult)) {
+                                    if (actualResult.getString("status").equals("success")
+                                            && actualResult.has("token")) {
+                                        obtainedToken = actualResult.getString("token");
+                                    }
+                                } else {
                                     failed = true;
                                 }
                             } else {
@@ -248,7 +254,9 @@ public class SlocaChecker {
                                 } else if (check.getString("type").equals("authenticate")) {
                                     JSONObject expectedResult = check.getJSONObject("value");
 
-                                    if (!performAuthenticateCheck(t, c + 1, description, expectedResult, actualResult)) {
+                                    if (performAuthenticateCheck(t, c + 1, description, expectedResult, actualResult)) {
+                                        obtainedToken = actualResult.getString("token");
+                                    } else {
                                         failed = true;
                                     }
                                 }
