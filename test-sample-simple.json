@@ -100,7 +100,7 @@
             "status":"error",
             "messages":["missing floor"]
         },
-        "date":"2014-01-01T00:00:00",
+        "date":"2014-01-01T00:00:00"
     },
     {
         "endpoint":"heatmap",
