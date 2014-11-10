@@ -9,8 +9,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -152,7 +152,9 @@ public class SlocaChecker {
                             }
 
                             // grab all remaining key/value pairs and add
-                            for (String key : (Set<String>) testData.keySet()) {
+                            Iterator<String> keys = (Iterator<String>) testData.keys();
+                            while (keys.hasNext()) {
+                                String key = keys.next();
                                 entityBuilder.addTextBody(key, testData.getString(key));
                             }
 
@@ -173,7 +175,9 @@ public class SlocaChecker {
                                 form.add("token", generatedToken);
                             }
                             // grab all remaining key/value pairs and add to the "form"
-                            for (String key : (Set<String>) testData.keySet()) {
+                            Iterator<String> keys = (Iterator<String>) testData.keys();
+                            while (keys.hasNext()) {
+                                String key = keys.next();
                                 form.add(key, testData.getString(key));
                             }
 
@@ -192,7 +196,9 @@ public class SlocaChecker {
                             uriBuilder.setParameter("token", generatedToken);
                         }
                         // grab all remaining key/value pairs and add to the URI
-                        for (String key : (Set<String>) testData.keySet()) {
+                        Iterator<String> keys = (Iterator<String>) testData.keys();
+                        while (keys.hasNext()) {
+                            String key = keys.next();
                             uriBuilder.setParameter(key, "" + testData.get(key));
                         }
 
