@@ -99,7 +99,7 @@ public class SlocaChecker {
                     endpoint = testData.getString("endpoint");
                     // optional keys
                     needsAuthentication = testData.optBoolean("authenticate", true);
-                    isPost = testData.optBoolean("post");
+                    isPost = testData.optBoolean("post", false);
                     if (testData.has("checks")) {
                         checks = testData.getJSONArray("checks");
                     } else {
